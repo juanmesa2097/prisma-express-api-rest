@@ -37,13 +37,19 @@ exports.getAuthor = asyncHandler(async (req, res) => {
 // @route     POST /api/v1/autores
 // @access    Public
 exports.createAuthor = asyncHandler(async (req, res) => {
-  const author = await prisma.author.create({
-    data: {
-      ...req.body,
-    },
-  });
-
-  res.status(200).json({ success: true, data: author });
+  try {
+    const author = await prisma.author.create({
+      data: {
+        ...req.body,
+      },
+    });
+    return res.status(200).json({ success: true, data: author });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "El autor ya se encuentra registrado.",
+    });
+  }
 });
 
 // @desc      Actualiza un autor
