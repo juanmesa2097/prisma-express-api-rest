@@ -3,15 +3,18 @@ const asyncHandler = require("../middlewares/async.middleware");
 
 const prisma = new PrismaClient();
 
+// @desc      Obtiene todas las publicaciones
+// @route     GET /api/v1/autores | /api/v1/autores?busqueda=<keyword>
+// @access    Public
 exports.getPosts = asyncHandler(async (req, res) => {
   const { busqueda } = req.query;
-  let posts;
-
-  posts = await prisma.post.findMany({
+  
+  const posts = await prisma.post.findMany({
     where: {
       OR: [
         { title: { contains: busqueda } },
         { content: { contains: busqueda } },
+        { resume: {contains: busqueda} }
       ],
     },
     include: { author: true },
@@ -20,6 +23,9 @@ exports.getPosts = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: posts });
 });
 
+// @desc      Obtiene una publicación por id
+// @route     GET /api/v1/autores
+// @access    Public
 exports.getPost = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -37,6 +43,9 @@ exports.getPost = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: post });
 });
 
+// @desc      Crea una publicación
+// @route     POST /api/v1/autores?email=<email>&password=<password>
+// @access    Private
 exports.createPost = asyncHandler(async (req, res) => {
   const { title, content, resume } = req.body;
   const { email, password } = req.query;
@@ -68,6 +77,9 @@ exports.createPost = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc      Actualiza una publicación
+// @route     PUT /api/v1/autores
+// @access    Public
 exports.updatePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -87,6 +99,9 @@ exports.updatePost = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc      Elimina una publicación
+// @route     DELETE /api/v1/autores?email=<email>&password=<password>
+// @access    Private
 exports.deletePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { email, password } = req.query;
