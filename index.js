@@ -14,4 +14,4 @@ app.use(morgan("dev"));
 app.use("/api/v1/autores", authors);
 
 const port = process.env.PORT || 3000;
-app.listen(port, console.log("Server listening on port", port));
+app.listen(port, console.log("Server is running on port", port));

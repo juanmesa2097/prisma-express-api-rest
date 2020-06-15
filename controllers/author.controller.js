@@ -1,36 +1,37 @@
 const { PrismaClient } = require("@prisma/client");
+const asyncHandler = require("../middlewares/async.middleware");
 
 const prisma = new PrismaClient();
 
-exports.getAuthors = async (req, res) => {
+exports.getAuthors = asyncHandler(async (req, res) => {
   const authors = await prisma.author.findMany({
     include: { posts: true },
   });
 
-  res.status(200).json(authors);
-};
+  res.status(200).json({ success: true, data: authors });
+});
 
-exports.getAuthor = async (req, res) => {
+exports.getAuthor = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const author = await prisma.author.findOne({
     where: { id: Number(id) },
   });
 
-  res.status(200).json(author);
-};
+  res.status(200).json({ success: true, data: author });
+});
 
-exports.createAuthor = async (req, res) => {
+exports.createAuthor = asyncHandler(async (req, res) => {
   const author = await prisma.author.create({
     data: {
       ...req.body,
     },
   });
 
-  res.status(200).json(author);
-};
+  res.status(200).json({ success: true, data: author });
+});
 
-exports.updateAuthor = async (req, res) => {
+exports.updateAuthor = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const author = await prisma.author.update({
@@ -41,9 +42,9 @@ exports.updateAuthor = async (req, res) => {
   });
 
   res.status(200).json(author);
-};
+});
 
-exports.deleteAuthor = async (req, res) => {
+exports.deleteAuthor = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const author = await prisma.author.delete({
@@ -53,4 +54,4 @@ exports.deleteAuthor = async (req, res) => {
   });
 
   res.status(200).json(author);
-};
+});
