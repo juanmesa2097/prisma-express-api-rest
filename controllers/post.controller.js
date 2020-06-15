@@ -14,7 +14,7 @@ exports.getPosts = asyncHandler(async (req, res) => {
       OR: [
         { title: { contains: busqueda } },
         { content: { contains: busqueda } },
-        { resume: {contains: busqueda} }
+        { summary: {contains: busqueda} }
       ],
     },
     include: { author: true },
@@ -47,7 +47,7 @@ exports.getPost = asyncHandler(async (req, res) => {
 // @route     POST /api/v1/autores?email=<email>&password=<password>
 // @access    Private
 exports.createPost = asyncHandler(async (req, res) => {
-  const { title, content, resume } = req.body;
+  const { title, content, summary } = req.body;
   const { email, password } = req.query;
 
   const author = await prisma.author.findMany({
@@ -66,14 +66,14 @@ exports.createPost = asyncHandler(async (req, res) => {
       data: {
         title,
         content,
-        resume,
+        summary,
         published: false,
         author: { connect: { id: author[0].id } },
       },
     });
     res.status(200).json({ success: true, data: post });
   } catch (err) {
-    res.status(400).json({ success: false, data: 'Los argumentos: title, content y resume son requeridos.' });
+    res.status(400).json({ success: false, data: 'Los argumentos: title, content y summary son requeridos.' });
   }
 });
 
