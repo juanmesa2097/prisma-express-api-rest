@@ -1,13 +1,17 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
-async function main() {
-  const allUsers = await prisma.author.findMany();
-  console.log(allUsers);
-}
-main()
-  .catch((e) => {
-    throw e;
-  })
-  .finally(async () => {
-    await prisma.disconnect();
-  });
+const express = require("express");
+const morgan = require("morgan");
+
+// Routes
+const authors = require("./routes/author.route");
+
+const app = express();
+
+// Middlewares
+app.use(express.json());
+app.use(morgan("dev"));
+
+// Mount routers
+app.use("/api/v1/autores", authors);
+
+const port = process.env.PORT || 3000;
+app.listen(port, console.log("Server listening on port", port));
