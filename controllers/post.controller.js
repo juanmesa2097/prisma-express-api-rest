@@ -4,7 +4,16 @@ const asyncHandler = require("../middlewares/async.middleware");
 const prisma = new PrismaClient();
 
 exports.getPosts = asyncHandler(async (req, res) => {
-  const posts = await prisma.post.findMany({
+  const { busqueda } = req.query;
+  let posts;
+
+  posts = await prisma.post.findMany({
+    where: {
+      OR: [
+        { title: { contains: busqueda } },
+        { content: { contains: busqueda } },
+      ],
+    },
     include: { author: true },
   });
 
@@ -19,23 +28,44 @@ exports.getPost = asyncHandler(async (req, res) => {
     include: { author: true },
   });
 
+  if (!post) {
+    return res
+      .status(404)
+      .json({ success: false, message: "La publicación no fue encontrada." });
+  }
+
   res.status(200).json({ success: true, data: post });
 });
 
 exports.createPost = asyncHandler(async (req, res) => {
-  console.log(req.body);
-  const { title, content, authorId } = req.body;
+  const { title, content, resume } = req.body;
+  const { email, password } = req.query;
 
-  const post = await prisma.post.create({
-    data: {
-      title,
-      content,
-      published: false,
-      author: { connect: { id: authorId } },
-    },
+  const author = await prisma.author.findMany({
+    where: { email: email || "", password: password || "" },
   });
 
-  res.status(200).json({ success: true, data: post });
+  if (author.length === 0) {
+    return res.status(401).json({
+      success: false,
+      message: "No tienes autorización para realizar la publicación.",
+    });
+  }
+
+  try {
+    const post = await prisma.post.create({
+      data: {
+        title,
+        content,
+        resume,
+        published: false,
+        author: { connect: { id: author[0].id } },
+      },
+    });
+    res.status(200).json({ success: true, data: post });
+  } catch (err) {
+    res.status(400).json({ success: false, data: 'Los argumentos: title, content y resume son requeridos.' });
+  }
 });
 
 exports.updatePost = asyncHandler(async (req, res) => {
@@ -44,20 +74,42 @@ exports.updatePost = asyncHandler(async (req, res) => {
   const data = req.body;
   data.published = true;
 
-  const post = await prisma.post.update({
-    where: { id: Number(id) },
-    data: { ...data },
-  });
-
-  res.status(200).json(post);
+  prisma.post
+    .update({
+      where: { id: Number(id) },
+      data: { ...data },
+    })
+    .then((post) => {
+      res.status(200).json(post);
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, message: err.meta.details });
+    });
 });
 
 exports.deletePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const { email, password } = req.query;
 
-  const post = await prisma.post.delete({
-    where: { id: Number(id) },
+  const author = await prisma.author.findMany({
+    where: { email: email || "", password: password || "" },
   });
 
-  res.status(200).json(post);
+  if (author.length === 0) {
+    return res.status(401).json({
+      success: false,
+      message: "No tienes autorización para eliminar la publicación.",
+    });
+  }
+
+  prisma.post
+    .delete({
+      where: { id: Number(id) },
+    })
+    .then((post) => {
+      res.status(200).json(post);
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, message: err.meta.details });
+    });
 });

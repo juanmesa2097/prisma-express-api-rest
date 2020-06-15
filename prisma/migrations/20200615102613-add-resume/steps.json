@@ -1,0 +1,18 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Post",
+      "field": "resume",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Post",
+      "field": "content",
+      "arity": "Required"
+    }
+  ]
+}

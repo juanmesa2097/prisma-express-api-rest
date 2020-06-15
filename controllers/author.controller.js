@@ -18,6 +18,12 @@ exports.getAuthor = asyncHandler(async (req, res) => {
     where: { id: Number(id) },
   });
 
+  if (!author) {
+    return res
+      .status(404)
+      .json({ success: false, message: "El autor no fue encontrado." });
+  }
+
   res.status(200).json({ success: true, data: author });
 });
 
